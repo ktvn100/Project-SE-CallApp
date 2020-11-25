@@ -1,0 +1,83 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.google.gms:google-services:4.2.0'
+    }
+}
+apply plugin: 'com.android.application'
+
+repositories {
+    mavenCentral()
+    google()
+    jcenter()
+    flatDir {
+      dirs '../../libs'
+    }
+}
+
+android {
+    compileSdkVersion 27
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 26
+        applicationId 'com.sinch.android.rtc.sample.video.filter'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFile getDefaultProguardFile('proguard-android.txt')
+            proguardFile 'proguard-project.txt'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+    }
+
+}
+
+preBuild.doFirst {
+    String[] path = project.buildscript.sourceFile.getParent().split("/")
+    String taskName = path[path.size()-1]
+    if (taskName.contains("-push") && !file("./google-services.json").exists()) {
+        outputFcmBuildError()
+    }
+}
+
+def outputFcmBuildError() {
+    System.err.println 'You are building one of Sinch sample projects that uses Firebase Cloud Messaging for delivering push notifications.'
+    System.err.println 'Android Studio FCM plugin requires \'google-services.json\' with correspondent \'package_name\' to be in gradle :app folder (e.g. in ./sinch-rtc-sample-push/)'
+    System.err.println 'Follow the Firebase Cloud Messaging manual here \'https://firebase.google.com/docs/android/setup\' to get one.'
+    System.err.println 'For details about Sinch Managed push notifications look here \'https://www.sinch.com/docs/voice/android/#pushnotifications\'.'
+    throw new GradleException('google-services.json NOT FOUND!')
+}
+
+dependencies {
+    implementation(name:'sinch-android-rtc', version:'+', ext:'aar')
+    implementation 'com.android.support:appcompat-v7:27.0.2'
+    
+}
+
