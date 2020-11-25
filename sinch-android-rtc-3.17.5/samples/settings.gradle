@@ -1,7 +1,0 @@
-include ':sinch-rtc-sample-calling',
-        ':sinch-rtc-sample-pstn',
-        ':sinch-rtc-sample-push',
-        ':sinch-rtc-sample-video',
-        ':sinch-rtc-sample-video-push',
-        ':sinch-rtc-sample-video-filter',
-        ':sinch-rtc-sample-video-screenshot'
