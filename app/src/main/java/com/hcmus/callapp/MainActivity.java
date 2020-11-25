@@ -1,4 +1,4 @@
-package hcmus.callapp;
+package com.hcmus.callapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 

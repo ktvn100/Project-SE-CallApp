@@ -7,7 +7,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        applicationId "hcmus.callapp"
+        applicationId "com.hcmus.callapp"
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
