@@ -4,8 +4,34 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.hcmus.callapp.ui.MainActivity">
+    android:orientation="vertical"
+    android:background="@drawable/gobg"
+    android:gravity="center"
+    tools:context=".ui.MainActivity">
 
+    <Button
+        android:id="@+id/findButton"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="0dp"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
+        android:background = "@drawable/gobtn"
+        android:text="GO"
+        android:textSize="50sp"
+        android:textColor="#FFFFFF"
+        android:fontFamily="@font/helvebold"
+        />
 
-
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/findButton"
+        android:layout_marginTop="50dp"
+        android:layout_gravity="center"
+        android:id= "@+id/goguide"
+        android:text="@string/go_guide"
+        android:fontFamily="@font/helveticaneue"
+        android:textColor="#3F414E"
+        android:textSize="30sp"/>
 </RelativeLayout>
