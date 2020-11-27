@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">VoiceProject</string>
+    <string name="app_name">Call App</string>
     <string name="describe">This is our product\nHope you have fun\nJust enter a name and go</string>
     <string name="go_guide">TOUCH AND GO</string>
 </resources>
