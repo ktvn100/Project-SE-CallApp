@@ -42,8 +42,7 @@
         android:text="Username"
         android:layout_gravity="center"
         android:fontFamily="@font/helveticaneue"
-        android:id="@+id/username"
-        />
+        android:id="@+id/username"/>
 
     <Button
         android:layout_width="wrap_content"

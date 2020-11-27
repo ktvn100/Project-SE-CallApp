@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "736207009966",
+    "firebase_url": "https://call-app-9dfec.firebaseio.com",
+    "project_id": "call-app-9dfec",
+    "storage_bucket": "call-app-9dfec.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:736207009966:android:b9c8d14d4766c3558a953f",
+        "android_client_info": {
+          "package_name": "com.hcmus.callapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "736207009966-2bbn2nctg8o503ja6dkgf25f20h8svb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8yA1ykP6HCqFrJc1YpR4a5HECR3i7FDI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "736207009966-2bbn2nctg8o503ja6dkgf25f20h8svb1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
