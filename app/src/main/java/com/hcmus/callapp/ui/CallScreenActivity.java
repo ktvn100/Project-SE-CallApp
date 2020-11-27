@@ -1,4 +1,4 @@
-package com.hcmus.callapp;
+package com.hcmus.callapp.ui;
 
 public class CallScreenActivity {
 }

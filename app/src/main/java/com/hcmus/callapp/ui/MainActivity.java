@@ -1,8 +1,10 @@
-package com.hcmus.callapp;
+package com.hcmus.callapp.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.hcmus.callapp.R;
 
 public class MainActivity extends AppCompatActivity {
 

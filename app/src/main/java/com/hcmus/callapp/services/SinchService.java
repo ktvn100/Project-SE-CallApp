@@ -1,4 +1,4 @@
-package com.hcmus.callapp;
+package com.hcmus.callapp.services;
 
 import android.app.Service;
 import android.content.Intent;
@@ -8,6 +8,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.hcmus.callapp.ui.CallScreenActivity;
 import com.sinch.android.rtc.ClientRegistration;
 import com.sinch.android.rtc.Sinch;
 import com.sinch.android.rtc.SinchClient;
@@ -89,7 +90,7 @@ public class SinchService extends Service {
         return _SinchServiceInterface;
     }
 
-    private class SinchServiceInterface extends Binder {
+    public class SinchServiceInterface extends Binder {
         public Call callUser(String userID){
             if (_SinchClient == null){
                 return null;
@@ -186,7 +187,7 @@ public class SinchService extends Service {
         @Override
         public void onIncomingCall(CallClient callClient, Call call) {
             Log.d(TAG,"Incoming call!");
-            Intent intent = new Intent(SinchService.this,CallScreenActivity.class);
+            Intent intent = new Intent(SinchService.this, CallScreenActivity.class);
             intent.putExtra(CALL_ID, call.getCallId());
             intent.putExtra(CALLER_SCREEN_KEY, true);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

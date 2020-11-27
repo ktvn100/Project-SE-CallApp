@@ -28,9 +28,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CallApp">
 
-        <service android:name="com.hcmus.callapp.SinchService" />
+        <service android:name="com.hcmus.callapp.services.SinchService" />
 
-        <activity android:name="com.hcmus.callapp.MainActivity"
+        <activity android:name="com.hcmus.callapp.ui.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
