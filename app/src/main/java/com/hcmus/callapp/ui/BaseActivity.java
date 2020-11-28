@@ -30,7 +30,9 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
         }
     }
 
-    protected abstract void onServiceConnected();
+    protected void onServiceConnected() {
+
+    }
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
@@ -40,7 +42,9 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
         }
     }
 
-    protected abstract void onServiceDisconnected();
+    protected void onServiceDisconnected() {
+
+    }
 
     protected SinchService.SinchServiceInterface getSinchServiceInterface(){
         return _SinchServiceInterface;
