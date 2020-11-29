@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
     private void registerUser() {
         String androidID = System.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         final String _Username = _edUsername.getText().toString();
-        User user = new User("0",androidID, _Username);
+        User user = new User("1",androidID, _Username);
 
         _DBRef.child(androidID).setValue(user);
     }
