@@ -1,7 +1,31 @@
 <resources>
-    <string name="app_name">Call App</string>
+    <string name="app_name">VoiceProject</string>
     <string name="describe">This is our product\nHope you have fun\nJust enter a name and go</string>
     <string name="go_guide">TOUCH AND GO</string>
+    <string name="title_activity_settings">SettingsActivity</string>
 
+    <string name="setting">Setting</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
+    <!-- Theme Switch-->
+    <string name="theme_header">Theme Setting</string>
+    <string name="theme_title">Change theme</string>
+    <string name="theme_summary_on">Dark mode is ON</string>
+    <string name="theme_summary_off">Light mode is ON</string>
     <string name="no_internet">No Internet Access</string>
+
 </resources>

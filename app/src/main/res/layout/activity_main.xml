@@ -6,16 +6,37 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/gobg"
-    android:gravity="center"
     tools:context=".ui.MainActivity">
 
+    <Chronometer
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_centerHorizontal="true"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="50dp"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        android:textColor="#3F414E"
+        android:fontFamily="@font/helveticaneue"
+        android:visibility="invisible"
+        android:id="@+id/waitingChrono"/>
+
+
+    <ProgressBar
+        android:id="@+id/progress_circular"
+        android:layout_centerInParent="true"
+        android:layout_width="270dp"
+        android:layout_height="270dp"
+        android:indeterminate="true"
+        android:visibility="invisible" />
     <Button
         android:id="@+id/findButton"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_marginTop="0dp"
+        android:layout_centerInParent="true"
+        android:gravity="center"
         android:layout_gravity="center"
-        android:scaleType="fitCenter"
         android:background = "@drawable/gobtn"
         android:text="GO"
         android:textSize="50sp"
@@ -26,6 +47,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         android:layout_below="@id/findButton"
         android:layout_marginTop="50dp"
         android:layout_gravity="center"
@@ -34,4 +56,14 @@
         android:fontFamily="@font/helveticaneue"
         android:textColor="#3F414E"
         android:textSize="30sp"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/setting"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:id="@+id/settingBtn"
+        />
 </RelativeLayout>
