@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/gobg"
+    android:background="@drawable/darkbg2"
     tools:context=".ui.CallingActivity">
 
     <Chronometer
@@ -17,8 +17,8 @@
         android:layout_marginTop="50dp"
         android:textSize="45sp"
         android:textStyle="bold"
-        android:textColor="#3F414E"
-        android:fontFamily="@font/helveticaneue"
+        android:textColor="#FFEB3B"
+        android:fontFamily="@font/helvebold"
         android:id="@+id/chronometer"/>
 
     <Button
@@ -30,6 +30,7 @@
         android:layout_marginBottom="50dp"
         android:layout_marginRight="30dp"
         android:background="@drawable/endcall01"
-        android:id="@+id/btn_hangup"/>
+        android:id="@+id/btn_hangup"
+        />
 
 </RelativeLayout>

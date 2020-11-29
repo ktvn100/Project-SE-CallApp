@@ -26,11 +26,14 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         if (SinchService.class.getName().equals(componentName.getClassName())){
+            _SinchServiceInterface = (SinchService.SinchServiceInterface) iBinder;
             onServiceConnected();
         }
     }
 
-    protected abstract void onServiceConnected();
+    protected void onServiceConnected() {
+
+    }
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
@@ -40,7 +43,9 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
         }
     }
 
-    protected abstract void onServiceDisconnected();
+    protected void onServiceDisconnected() {
+
+    }
 
     protected SinchService.SinchServiceInterface getSinchServiceInterface(){
         return _SinchServiceInterface;

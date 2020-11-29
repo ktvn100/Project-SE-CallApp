@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE " />
 
     <uses-feature
         android:name="android.hardware.sip.voip"
@@ -27,8 +28,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".ui.CallingActivity"></activity>
-        <activity android:name=".ui.LoginActivity">
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
+        <activity android:name=".ui.CallingActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name=".ui.LoginActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,9 +40,9 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".services.SinchService" />
+        <!--<service android:name=".services.SinchService" />-->
 
-        <activity android:name=".ui.MainActivity"></activity>
+        <activity android:name=".ui.MainActivity" android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>
