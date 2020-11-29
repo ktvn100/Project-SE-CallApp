@@ -128,6 +128,7 @@ public class CallingActivity extends AppCompatActivity {
         curUser.status = "1";
         _DBRefs.child(callerId).setValue(curUser);
         chronometer.stop();
+        sinchClient.stopListeningOnActiveConnection();
         sinchClient.stop();
         openMainActivity();
         finish();
