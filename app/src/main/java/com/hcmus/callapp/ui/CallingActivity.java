@@ -2,9 +2,11 @@ package com.hcmus.callapp.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.preference.PreferenceManager;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -88,14 +90,18 @@ public class CallingActivity extends AppCompatActivity {
 
         //sinchClient.getCallClient().setRespectNativeCalls(false);
         sinchClient.getCallClient().addCallClientListener(new SinchCallClientListener());
-
         sinchClient.startListeningOnActiveConnection();
 
         sinchClient.start();
+
         handleCall();
 
-        setContentView(R.layout.activity_calling);
-
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        boolean dark_mode = sharedPreferences.getBoolean("themeMode", false);
+        if (dark_mode)
+            setContentView(R.layout.activity_calling_dark);
+        else
+            setContentView(R.layout.activity_calling);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         chronometer.setText("Waiting...");
 
@@ -117,7 +123,7 @@ public class CallingActivity extends AppCompatActivity {
     }
 
     private void listenCall() {
-
+        sinchClient.startListeningOnActiveConnection();
     }
 
     private void endCall() {

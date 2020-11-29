@@ -6,7 +6,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,10 +37,21 @@ public class LoginActivity extends AppCompatActivity {
     private DatabaseReference _DBRef;
     private FirebaseAuth _Auth;
 
+    public int state = 1;
+    public SettingButton settingButton;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        boolean dark_mode = sharedPreferences.getBoolean("themeMode", false);
+        if (dark_mode)
+            setContentView(R.layout.activity_login_dark);
+        else
+            setContentView(R.layout.activity_login);
+
 
         ButterKnife.bind(this);
 
@@ -53,8 +66,8 @@ public class LoginActivity extends AppCompatActivity {
                 registerUser();
                 openMainActivity();
             }
-
         });
+        settingButton = new SettingButton(this, R.id.settingBtn);
     }
 
     private void registerUser() {
