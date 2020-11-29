@@ -36,7 +36,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".services.SinchService" />
+        <!--<service android:name=".services.SinchService" />-->
 
         <activity android:name=".ui.MainActivity"></activity>
     </application>

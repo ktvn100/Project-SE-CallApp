@@ -1,6 +1,8 @@
 package com.hcmus.callapp.model;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     public String status, androidID, username;
 
     public User(String status,String androidID, String username) {
@@ -9,7 +11,7 @@ public class User {
         this.username = username;
     }
 
-    public User() {
+    public User(User user) {
 
     }
 
