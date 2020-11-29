@@ -128,10 +128,12 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("CurUser",curUser);
 
         startActivity(intent);
+        finish();
     }
 
     private void openCallingActivity() {
         Intent intent = new Intent(this, CallingActivity.class);
         startActivity(intent);
+        finish();
     }
 }
