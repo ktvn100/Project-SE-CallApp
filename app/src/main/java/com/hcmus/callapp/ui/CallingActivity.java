@@ -86,11 +86,12 @@ public class CallingActivity extends AppCompatActivity {
 
         sinchClient.setSupportCalling(true);
 
-        sinchClient.getCallClient().setRespectNativeCalls(false);
+        //sinchClient.getCallClient().setRespectNativeCalls(false);
         sinchClient.getCallClient().addCallClientListener(new SinchCallClientListener());
 
-        sinchClient.start();
+        sinchClient.startListeningOnActiveConnection();
 
+        sinchClient.start();
         handleCall();
 
         setContentView(R.layout.activity_calling);
@@ -116,7 +117,7 @@ public class CallingActivity extends AppCompatActivity {
     }
 
     private void listenCall() {
-        sinchClient.startListeningOnActiveConnection();
+
     }
 
     private void endCall() {
