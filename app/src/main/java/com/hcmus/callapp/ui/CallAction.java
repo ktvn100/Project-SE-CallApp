@@ -142,7 +142,7 @@ public class CallAction {
         Intent intent = new Intent(activity, CallingActivity.class);
         intent.putExtra("User",user);
         intent.putExtra("CurUser",curUser);
-
+        activity.finish();
         activity.startActivity(intent);
     }
 }
