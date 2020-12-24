@@ -7,7 +7,7 @@
     android:weightSum="5"
     tools:context=".ui.LoginActivity"
     android:id="@+id/loginParent"
-    android:background="@color/white"
+    android:background="@drawable/dark_bg"
     android:orientation="vertical">
 
     <TextView
@@ -20,7 +20,7 @@
         android:textSize="38dp"
         android:gravity="center"
         android:fontFamily="@font/helvebold"
-        android:textColor="#3F414E" />
+        android:textColor="#A89C2E" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -29,8 +29,9 @@
         android:layout_below="@id/welcome"
         android:text="@string/describe"
         android:fontFamily="@font/helveticaneue"
-        android:textColor="#A1A4B2"
+        android:textColor="#C69C1E"
         android:layout_gravity="center"
+        android:gravity="center"
         android:layout_marginTop="100dp"
         android:textSize="25dp"/>
 
@@ -70,5 +71,6 @@
         android:layout_marginRight="20dp"
         android:id="@+id/settingBtn"
         />
+
 
 </RelativeLayout>
