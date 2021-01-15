@@ -2,10 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hcmus.callapp">
 
-    <uses-feature
-        android:name="android.hardware.microphone"
-        android:required="false" />
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
@@ -15,6 +11,17 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE " />
 
+    <uses-feature
+        android:name="android.hardware.sip.voip"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="true" />
+
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -22,10 +29,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
+        <service android:name="com.hcmus.callapp.services.SinchService"
+                android:enabled="true"
+                android:exported="true"
+                android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".ui.SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
-        <activity android:name=".ui.CallingActivity" android:screenOrientation="portrait"></activity>
+            android:label="@string/title_activity_settings">
+        </activity>
+
+        <activity
+            android:name=".ui.CallingActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask">
+
+        </activity>
+
         <activity android:name=".ui.LoginActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,9 +59,12 @@
             </intent-filter>
         </activity>
 
-        <!--<service android:name=".services.SinchService" />-->
+        <activity
+            android:name=".ui.MainActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask">
 
-        <activity android:name=".ui.MainActivity" android:screenOrientation="portrait"></activity>
+        </activity>
     </application>
 
 </manifest>

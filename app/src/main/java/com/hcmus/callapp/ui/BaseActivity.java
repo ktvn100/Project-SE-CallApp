@@ -12,22 +12,28 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.hcmus.callapp.services.SinchService;
 
 public abstract class BaseActivity extends AppCompatActivity implements ServiceConnection {
-    private SinchService.SinchServiceInterface _SinchServiceInterface;
+    private SinchService.SinchServiceInterface mSinchServiceInterface;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getApplicationContext()
-                .bindService(
-                        new Intent(this, SinchService.class),
-                        this,BIND_AUTO_CREATE);
+        getApplicationContext().bindService(new Intent(this, SinchService.class), this,
+                BIND_AUTO_CREATE);
     }
 
     @Override
-    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-        if (SinchService.class.getName().equals(componentName.getClassName())){
-            _SinchServiceInterface = (SinchService.SinchServiceInterface) iBinder;
+    public void onServiceConnected(ComponentName name, IBinder iBinder) {
+        if (SinchService.class.getName().equals(name.getClassName())) {
+            mSinchServiceInterface = (SinchService.SinchServiceInterface) iBinder;
             onServiceConnected();
+        }
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+        if (SinchService.class.getName().equals(componentName.getClassName())) {
+            mSinchServiceInterface = null;
+            onServiceDisconnected();
         }
     }
 
@@ -35,20 +41,12 @@ public abstract class BaseActivity extends AppCompatActivity implements ServiceC
 
     }
 
-    @Override
-    public void onServiceDisconnected(ComponentName componentName) {
-        if (SinchService.class.getName().equals(componentName.getClassName())){
-            _SinchServiceInterface = null;
-            onServiceDisconnected();
-        }
-    }
-
     protected void onServiceDisconnected() {
 
     }
 
     protected SinchService.SinchServiceInterface getSinchServiceInterface(){
-        return _SinchServiceInterface;
+        return mSinchServiceInterface;
     }
 
 }

@@ -28,17 +28,20 @@ import android.provider.Settings.System;
 public class LoginActivity extends AppCompatActivity {
 
     @BindView(R.id.login)
-    Button _btnLogin;
+    Button btnLogin;
 
     @BindView(R.id.username)
-    EditText _edUsername;
+    EditText edtUsername;
 
-    private FirebaseDatabase _UserDB;
-    private DatabaseReference _DBRef;
-    private FirebaseAuth _Auth;
+    private FirebaseDatabase mUserDB;
+    private DatabaseReference mDBRef;
+    private FirebaseAuth mAuth;
 
     public int state = 1;
     public SettingButton settingButton;
+
+    private static final String SHARED_PREFS_KEY = "shared_prefs";
+    private static final String SINCH_ID_KEY = "sinch_id";
 
 
     @Override
@@ -55,9 +58,9 @@ public class LoginActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        _UserDB = FirebaseDatabase.getInstance();
-        _DBRef = _UserDB.getReference("Users");
-        _Auth = FirebaseAuth.getInstance();
+        mUserDB = FirebaseDatabase.getInstance();
+        mDBRef = mUserDB.getReference("Users");
+        mAuth = FirebaseAuth.getInstance();
 
         Button button = (Button) findViewById(R.id.login);
         button.setOnClickListener(new View.OnClickListener() {
@@ -72,10 +75,13 @@ public class LoginActivity extends AppCompatActivity {
 
     private void registerUser() {
         String androidID = System.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-        final String _Username = _edUsername.getText().toString();
+        final String _Username = edtUsername.getText().toString();
         User user = new User("1",androidID, _Username);
 
-        _DBRef.child(androidID).setValue(user);
+        mDBRef.child(androidID).setValue(user);
+
+        SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
+        prefs.edit().putString(SINCH_ID_KEY, "b").apply();
     }
 
     private void openMainActivity() {

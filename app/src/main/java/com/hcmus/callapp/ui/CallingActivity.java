@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
@@ -24,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.hcmus.callapp.R;
 import com.hcmus.callapp.model.User;
 import com.hcmus.callapp.services.SinchService;
+import com.hcmus.callapp.utils.NoResponseHandler;
 import com.sinch.android.rtc.ClientRegistration;
 import com.sinch.android.rtc.MissingPermissionException;
 import com.sinch.android.rtc.PushPair;
@@ -42,27 +44,38 @@ import java.util.List;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class CallingActivity extends AppCompatActivity {
+public class CallingActivity extends BaseActivity {
 
     private static final String APP_KEY = "112fc617-342d-488d-b838-57181b208d53";
     private static final String APP_SECRET = "kHo4NcMhJUihhTX/rYE6UQ==";
     private static final String ENVIRONMENT = "clientapi.sinch.com";
 
-    private Call call;
+    //private Call call;
     private TextView callState;
     private SinchClient sinchClient;
     private Button button;
     private String callerId;
     private String recipientId;
 
+    private static final String SHARED_PREFS_KEY = "shared_prefs";
+    private static final String SINCH_ID_KEY = "sinch_id";
+    private boolean mServiceConnected = false;
+    private String mSinchId;
+    private String mCallId;
+
+    private static final String CALLERID_DATA_KEY = "callerId";
+
     private User user = null;
     private User curUser = null;
+    private String mOriginalCaller;
+    private String mOriginalReceiver;
 
-    private FirebaseDatabase _Database;
-    private DatabaseReference _DBRefs;
+    private FirebaseDatabase mDatabase;
+    private DatabaseReference mDBRefs;
 
     private String _callId = null;
     private Chronometer chronometer;
+    private SinchService.SinchServiceInterface mSinchServiceInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,34 +83,6 @@ public class CallingActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
         Timber.d("CallingActivity launched");
-
-        _Database = FirebaseDatabase.getInstance();
-        _DBRefs = _Database.getReference("Users");
-
-        user = (User) getIntent().getSerializableExtra("User");
-        curUser = (User) getIntent().getSerializableExtra("CurUser");
-
-        if (curUser != null) callerId = curUser.androidID;
-        if (user != null) recipientId = user.androidID;
-
-        sinchClient = Sinch.getSinchClientBuilder()
-                .context(this)
-                .userId(callerId)
-                .applicationKey(APP_KEY)
-                .applicationSecret(APP_SECRET)
-                .environmentHost(ENVIRONMENT)
-                .build();
-
-        sinchClient.setSupportCalling(true);
-        sinchClient.startListeningOnActiveConnection();
-
-        //sinchClient.addSinchClientListener(new MySinchClientListener());
-        sinchClient.getCallClient().setRespectNativeCalls(false);
-        sinchClient.getCallClient().addCallClientListener(new SinchCallClientListener());
-
-        sinchClient.start();
-
-        handleCall();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean dark_mode = sharedPreferences.getBoolean("themeMode", false);
@@ -107,6 +92,11 @@ public class CallingActivity extends AppCompatActivity {
             setContentView(R.layout.activity_calling);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         chronometer.setText("Waiting...");
+
+        SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
+        mSinchId = prefs.getString(SINCH_ID_KEY, null);
+
+        handleCall();
 
         Button btnHangUp = (Button) findViewById(R.id.btn_hangup);
         btnHangUp.setOnClickListener(new View.OnClickListener() {
@@ -118,34 +108,78 @@ public class CallingActivity extends AppCompatActivity {
     }
 
     private void handleCall() {
-        if (user != null){
+        if (getIntent().hasExtra(CALLERID_DATA_KEY)){
+            mOriginalCaller = getIntent().getStringExtra(CALLERID_DATA_KEY);
             createCall();
         } else {
             listenCall();
         }
     }
 
+
+    @Override
+    public void onServiceConnected() {
+        mServiceConnected = true;
+        if (getSinchServiceInterface() != null && !getSinchServiceInterface().isStarted()) {
+            getSinchServiceInterface().startClient(mSinchId);
+        }
+        if (mCallId != null){
+            Call call = getSinchServiceInterface().getCall(mCallId);
+            if (call != null) {
+                call.answer();
+                call.addCallListener(new SinchCallListener());
+                mOriginalReceiver = call.getRemoteUserId();
+            }
+        }
+    }
+
     private void listenCall() {
-        sinchClient.startListeningOnActiveConnection();
+        //sinchClient.startListeningOnActiveConnection();
+        //NoResponseHandler.stopHandler();
+        Intent intent = new Intent("finish_waitingcallactivity");
+        sendBroadcast(intent);
+
+        mCallId = getIntent().getStringExtra(SinchService.CALL_ID);
+        Timber.d(mCallId);
     }
 
     private void endCall() {
+        Call call = getSinchServiceInterface().getCall(mCallId);
         if (call != null){
             call.hangup();
         }
 
-        curUser.status = "1";
-        _DBRefs.child(callerId).setValue(curUser);
+        /*curUser.status = "1";
+        mDBRefs.child(callerId).setValue(curUser);*/
         chronometer.stop();
-        sinchClient.stopListeningOnActiveConnection();
-        sinchClient.terminate();
+        //sinchClient.stopListeningOnActiveConnection();
+        //sinchClient.terminate();
         openMainActivity();
     }
 
     private void createCall() {
-        call = sinchClient.getCallClient().callUser(recipientId);
-        call.addCallListener(new SinchCallListener());
+        onServiceConnected();
+        try {
+            Call call = null;
+            //mSinchServiceInterface = getSinchServiceInterface();
+            if (getSinchServiceInterface() != null){
+                call = getSinchServiceInterface().callUser(mOriginalCaller);
+            }
+
+            if (call == null) {
+                // Service failed for some reason, show a Toast and abort
+                Toast.makeText(this, "An error has occurred", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            mCallId = call.getCallId();
+            call.addCallListener(new SinchCallListener());
+        } catch (MissingPermissionException e) {
+            ActivityCompat.requestPermissions(this, new String[]{e.getRequiredPermission()}, 0);
+        }
     }
+
+
 
     private class SinchCallListener implements CallListener {
         @Override
@@ -169,17 +203,6 @@ public class CallingActivity extends AppCompatActivity {
         @Override
         public void onShouldSendPushNotification(Call call, List<PushPair> pushPairs) {
             // Send a push through your push provider here, e.g. FCM
-        }
-    }
-
-    private class SinchCallClientListener implements CallClientListener {
-        @Override
-        public void onIncomingCall(CallClient callClient, Call incomingCall) {
-            call = incomingCall;
-            Toast.makeText(CallingActivity.this, "Connected!", Toast.LENGTH_SHORT).show();
-            call.answer();
-            call.addCallListener(new SinchCallListener());
-            startClock();
         }
     }
 
