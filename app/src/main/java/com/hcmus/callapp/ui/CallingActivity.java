@@ -7,10 +7,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -44,7 +50,7 @@ import java.util.List;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class CallingActivity extends BaseActivity {
+public class CallingActivity extends BaseActivity implements SensorEventListener {
 
     private static final String APP_KEY = "112fc617-342d-488d-b838-57181b208d53";
     private static final String APP_SECRET = "kHo4NcMhJUihhTX/rYE6UQ==";
@@ -77,12 +83,20 @@ public class CallingActivity extends BaseActivity {
     private Chronometer chronometer;
     private SinchService.SinchServiceInterface mSinchServiceInterface;
 
+    private SensorManager mSensorManager;
+    private Sensor mProximity;
+    private PowerManager mPowerManager;
+    private PowerManager.WakeLock mWakeLock;
+    private boolean mIsSpeakerPhone = false;
+    private boolean mIsMicMuted = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ButterKnife.bind(this);
         Timber.d("CallingActivity launched");
+
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean dark_mode = sharedPreferences.getBoolean("themeMode", false);
@@ -96,6 +110,8 @@ public class CallingActivity extends BaseActivity {
         SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
         mSinchId = prefs.getString(SINCH_ID_KEY, null);
 
+        setupProximitySensor();
+
         handleCall();
 
         Button btnHangUp = (Button) findViewById(R.id.btn_hangup);
@@ -105,6 +121,27 @@ public class CallingActivity extends BaseActivity {
                 endCall();
             }
         });
+    }
+
+    private void setupProximitySensor() {
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+
+        if (mProximity != null) {
+            mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
+                    mPowerManager.isPowerSaveMode()) {
+                Toast.makeText(this, "If you experience any problems in the call, turn off device power saving mode and try again", Toast.LENGTH_LONG).show();
+            }
+            int field = 0x00000020;
+            try {
+                // Yeah, this is hidden field.
+                field = PowerManager.class.getField("PROXIMITY_SCREEN_OFF_WAKE_LOCK").getInt(null);
+            } catch (Throwable ignored) {
+            }
+            mWakeLock = mPowerManager.newWakeLock(field, getLocalClassName());
+        }
     }
 
     private void handleCall() {
@@ -158,10 +195,11 @@ public class CallingActivity extends BaseActivity {
     }
 
     private void createCall() {
-        onServiceConnected();
+        //onServiceConnected();
         try {
             Call call = null;
             //mSinchServiceInterface = getSinchServiceInterface();
+
             if (getSinchServiceInterface() != null){
                 call = getSinchServiceInterface().callUser(mOriginalCaller);
             }
@@ -179,6 +217,24 @@ public class CallingActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        if (sensorEvent.values[0] < sensorEvent.sensor.getMaximumRange() /*face near phone*/) {
+
+            if (!mWakeLock.isHeld()) {
+                mWakeLock.acquire();
+            }
+        } else {
+            if (mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
 
 
     private class SinchCallListener implements CallListener {

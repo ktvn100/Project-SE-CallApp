@@ -28,9 +28,9 @@ public class SinchService extends Service {
     public static final String CALL_ID = "call_id";
     static final String TAG = SinchService.class.getSimpleName();
 
-    private SinchServiceInterface mSinchServiceInterface = new SinchServiceInterface();
-    private SinchClient mSinchClient = null;
-    private String mUserID = "anonymous";
+    private final IBinder mSinchServiceInterface = new SinchServiceInterface();
+    private SinchClient mSinchClient;
+    private String mUserID;
 
     private String CALLER_SCREEN_KEY = "caller_screen";
 

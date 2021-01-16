@@ -130,7 +130,7 @@ public class CallAction {
                 } else {
                     callUser(user,curUser);
                 }*/
-                callUser(user,curUser);
+                //callUser(user,curUser);
             }
 
             @Override
@@ -144,7 +144,7 @@ public class CallAction {
         intent.putExtra("User",user);
         intent.putExtra("CurUser",curUser);
         intent.putExtra(CALLERID_DATA_KEY, "a");
-        activity.finish();
+        //activity.finish();
         activity.startActivity(intent);
     }
 }
