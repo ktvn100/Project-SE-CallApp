@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -50,9 +51,13 @@ import com.sinch.android.rtc.calling.CallEndCause;
 import com.sinch.android.rtc.calling.CallListener;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.ButterKnife;
 import timber.log.Timber;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class CallingActivity extends BaseActivity implements SensorEventListener {
 
@@ -88,12 +93,29 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
     private Chronometer chronometer;
     private SinchService.SinchServiceInterface mSinchServiceInterface;
 
+    private Timer mTimer;
+    private UpdateCallDurationTask mDurationTask;
+    private long mTotalDuration;
+
     private SensorManager mSensorManager;
     private Sensor mProximity;
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
     private boolean mIsSpeakerPhone = false;
     private boolean mIsMicMuted = false;
+
+    private class UpdateCallDurationTask extends TimerTask {
+
+        @Override
+        public void run() {
+            CallingActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    updateCallDuration();
+                }
+            });
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,7 +194,7 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.child(callerId).child(CALL_REQUEST_KEY).getValue().equals("true")) {
-                    mDBRef.child("users").child(callerId).child(CALL_REQUEST_KEY).setValue("false");
+                    //mDBRef.child("users").child(callerId).child(CALL_REQUEST_KEY).setValue("false");
                     if (mServiceConnected) {
                         createCall();
                     }
@@ -248,10 +270,64 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
                 return;
             }
 
+            mTimer = new Timer();
+            mDurationTask = new UpdateCallDurationTask();
+            mTimer.schedule(mDurationTask, 0, 500);
+
             mCallId = call.getCallId();
             call.addCallListener(new SinchCallListener());
+            if (call.getState().toString().equals("INITIATING")) {
+
+                chronometer.setText(R.string.connecting);
+            } else {
+                chronometer.setText(call.getState().toString());
+            }
         } catch (MissingPermissionException e) {
             ActivityCompat.requestPermissions(this, new String[]{e.getRequiredPermission()}, 0);
+        }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+
+        if (mDurationTask != null) {
+            mDurationTask.cancel();
+            mTimer.cancel();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mProximity != null) {
+            if (mWakeLock.isHeld()) {
+
+                mWakeLock.release();
+            }
+        }
+        mSensorManager.unregisterListener(this);
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mProximity != null) {
+            mSensorManager.registerListener(this, mProximity, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        else {
+            mTimer = new Timer();
+            mDurationTask = new UpdateCallDurationTask();
+            mTimer.schedule(mDurationTask, 0, 500);
         }
     }
 
@@ -272,6 +348,31 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
+    }
+
+    private String formatTimespan(int totalSeconds) {
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
+        return String.format(Locale.US, "%02d:%02d", minutes, seconds);
+    }
+
+    private void updateCallDuration() {
+        Call call = getSinchServiceInterface().getCall(mCallId);
+        if (call != null) {
+
+        }
+    }
+
+    private void updateDatabaseCallDuration(final long duration) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (Looper.myLooper() == null) {
+                    Looper.prepare();
+                }
+                mTotalDuration += duration;
+            }
+        }).start();
     }
 
 
