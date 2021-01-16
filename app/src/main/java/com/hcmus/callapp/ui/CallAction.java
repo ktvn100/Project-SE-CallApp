@@ -116,11 +116,11 @@ public class CallAction {
 
 
                     if (androidID.equals(ID)){
-                        curUser = new User(status,androidID,username);
+                        //curUser = new User(status,androidID,username);
                         Log.d("ID: ", androidID);
                     } else {
                         if (status.equals("0")){
-                            user = new User(status,androidID,username);
+                            //user = new User(status,androidID,username);
                             Log.d("ID: ", androidID);
                         }
                     }

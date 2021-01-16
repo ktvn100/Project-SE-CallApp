@@ -26,8 +26,12 @@ import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.hcmus.callapp.R;
 import com.hcmus.callapp.model.User;
 import com.hcmus.callapp.services.SinchService;
@@ -77,7 +81,8 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
     private String mOriginalReceiver;
 
     private FirebaseDatabase mDatabase;
-    private DatabaseReference mDBRefs;
+    private DatabaseReference mDBRef;
+    private static final String CALL_REQUEST_KEY = "call_request";
 
     private String _callId = null;
     private Chronometer chronometer;
@@ -110,6 +115,8 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
         SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
         mSinchId = prefs.getString(SINCH_ID_KEY, null);
 
+        initialiseAuthAndDatabaseReference();
+
         setupProximitySensor();
 
         handleCall();
@@ -121,6 +128,11 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
                 endCall();
             }
         });
+    }
+
+    private void initialiseAuthAndDatabaseReference() {
+        mDatabase = FirebaseDatabase.getInstance();
+        mDBRef = mDatabase.getReference();
     }
 
     private void setupProximitySensor() {
@@ -147,10 +159,36 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
     private void handleCall() {
         if (getIntent().hasExtra(CALLERID_DATA_KEY)){
             mOriginalCaller = getIntent().getStringExtra(CALLERID_DATA_KEY);
-            createCall();
+            //createCall();
+            createCallOrTooLate(mOriginalCaller);
         } else {
             listenCall();
         }
+    }
+
+    private void createCallOrTooLate(final String callerId) {
+        Query query = mDBRef.child("users");
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.child(callerId).child(CALL_REQUEST_KEY).getValue().equals("true")) {
+                    mDBRef.child("users").child(callerId).child(CALL_REQUEST_KEY).setValue("false");
+                    if (mServiceConnected) {
+                        createCall();
+                    }
+                } else {
+                    //TODO Replace with proper activity
+                    Toast.makeText(CallingActivity.this, "Too late. Someone else has picked the call", Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(CallingActivity.this, MainActivity.class));
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
 

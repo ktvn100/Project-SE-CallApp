@@ -160,10 +160,10 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
     }
 
     private void makeCall() {
-        String ID = Settings.System.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        String ID = "b";
         Log.d("ID: ", ID);
 
-        DatabaseReference _DBRef = FirebaseDatabase.getInstance().getReference("Users");
+        DatabaseReference _DBRef = FirebaseDatabase.getInstance().getReference("users");
         _DBRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -171,6 +171,7 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
                 Log.d("Size: ", String.valueOf(size));
 
                 _DBRef.child(ID).child("status").setValue("0");
+                _DBRef.child(ID).child("call_request").setValue("true");
 
                 User user = null, curUser = null;
 
@@ -178,15 +179,16 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
                     String status = dss.child("status").getValue().toString();
                     String androidID = dss.child("androidID").getValue().toString();
                     String username = dss.child("username").getValue().toString();
+                    String call_request = dss.child("call_request").getValue().toString();
                     //User tempUser = new User(status,androidID,username);
 
 
                     if (androidID.equals(ID)){
-                        curUser = new User(status,androidID,username);
+                        curUser = new User(status,androidID,username,call_request);
                         Log.d("ID: ", androidID);
                     } else {
                         if (status.equals("0")){
-                            user = new User(status,androidID,username);
+                            user = new User(status,androidID,username,call_request);
                             Log.d("ID: ", androidID);
                         }
                     }

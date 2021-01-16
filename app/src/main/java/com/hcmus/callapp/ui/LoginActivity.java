@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,6 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.hcmus.callapp.R;
 import com.hcmus.callapp.model.User;
+import com.hcmus.callapp.utils.AESUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         mUserDB = FirebaseDatabase.getInstance();
-        mDBRef = mUserDB.getReference("Users");
+        mDBRef = mUserDB.getReference("users");
         mAuth = FirebaseAuth.getInstance();
 
         Button button = (Button) findViewById(R.id.login);
@@ -75,10 +77,20 @@ public class LoginActivity extends AppCompatActivity {
 
     private void registerUser() {
         String androidID = System.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-        final String _Username = edtUsername.getText().toString();
-        User user = new User("1",androidID, _Username);
+        String encrypted = "";
+        try {
+            encrypted = AESUtils.encrypt(androidID);
+            Log.d("TEST", "encrypted:" + encrypted);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        mDBRef.child(androidID).setValue(user);
+        final String _Username = edtUsername.getText().toString();
+        encrypted = "b";
+
+        User user = new User("1",encrypted, _Username,"false");
+
+        mDBRef.child(encrypted).setValue(user);
 
         SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
         prefs.edit().putString(SINCH_ID_KEY, "b").apply();
