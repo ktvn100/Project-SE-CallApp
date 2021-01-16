@@ -86,14 +86,14 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         final String _Username = edtUsername.getText().toString();
-        encrypted = "b";
+        //encrypted = "ABC";
 
-        User user = new User("1",encrypted, _Username,"false");
+        User user = new User("0",encrypted, _Username,"false");
 
         mDBRef.child(encrypted).setValue(user);
 
         SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
-        prefs.edit().putString(SINCH_ID_KEY, "b").apply();
+        prefs.edit().putString(SINCH_ID_KEY, encrypted).apply();
     }
 
     private void openMainActivity() {

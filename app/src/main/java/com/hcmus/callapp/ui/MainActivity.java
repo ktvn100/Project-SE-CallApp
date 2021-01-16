@@ -47,7 +47,7 @@ import static android.content.ContentValues.TAG;
 
 public class MainActivity extends BaseActivity implements SinchService.StartFailedListened {
 
-    private String mSinchId = "b";
+    private String mSinchId;
     private String mOriginalCaller;
 
     private NetworkChangeReceiver networkChangeReceiver;
@@ -55,6 +55,8 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
     private AlertDialog mInternetDialog;
     private BroadcastReceiver finishReceiver;
     private SinchService.SinchServiceInterface mSinchServiceInterface;
+    private static final String SHARED_PREFS_KEY = "shared_prefs";
+    private static final String SINCH_ID_KEY = "sinch_id";
 
     @BindView(R.id.findButton)
     Button _btn_find;
@@ -84,8 +86,23 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
         filter.addAction("android.net.wifi.WIFI_STATE_CHANGED");
         filter.addAction("ACTION_TRIGGER_RECEIVER");
 
+        SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
+        mSinchId = prefs.getString(SINCH_ID_KEY, null);
+
         networkChangeReceiver = new NetworkChangeReceiver();
         registerReceiver(networkChangeReceiver, filter);
+
+        finishReceiver = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (action.equals("finish_waitingcallactivity")) {
+                    finish();
+                }
+            }
+        };
+        registerReceiver(finishReceiver, new IntentFilter("finish_waitingcallactivity"));
 
         Timber.plant(new Timber.DebugTree());
 
@@ -144,6 +161,13 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
         // Bat dau tim kiem
         //findingMate();
         makeCall();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                finish();
+            }
+        }, 36000);
+        //GoUnActive();
     }
 
     private void findingMate() {
@@ -160,18 +184,18 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
     }
 
     private void makeCall() {
-        String ID = "b";
+        String ID = mSinchId;
         Log.d("ID: ", ID);
 
         DatabaseReference _DBRef = FirebaseDatabase.getInstance().getReference("users");
-        _DBRef.addValueEventListener(new ValueEventListener() {
+        _DBRef.child(ID).child("status").setValue("1");
+        _DBRef.child(ID).child("call_request").setValue("true");
+
+        _DBRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 int size = (int)snapshot.getChildrenCount();
                 Log.d("Size: ", String.valueOf(size));
-
-                _DBRef.child(ID).child("status").setValue("0");
-                _DBRef.child(ID).child("call_request").setValue("true");
 
                 User user = null, curUser = null;
 
@@ -187,7 +211,7 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
                         curUser = new User(status,androidID,username,call_request);
                         Log.d("ID: ", androidID);
                     } else {
-                        if (status.equals("0")){
+                        if (status.equals("1") && call_request.equals("true")){
                             user = new User(status,androidID,username,call_request);
                             Log.d("ID: ", androidID);
                         }
@@ -198,7 +222,9 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
                 } else {
                     callUser(user,curUser);
                 }*/
-                callUser(user,curUser);
+                if (user != null){
+                    callUser(user,curUser);
+                }
             }
 
             @Override
@@ -209,10 +235,10 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
 
     private void callUser(User user, User curUser) {
         Intent intent = new Intent(this, CallingActivity.class);
-        intent.putExtra("User",user);
-        intent.putExtra("CurUser",curUser);
-        intent.putExtra(CALLERID_DATA_KEY, "a");
-        //activity.finish();
+        //intent.putExtra("User",user);
+        //intent.putExtra("CurUser",curUser);
+        intent.putExtra(CALLERID_DATA_KEY, user.androidID);
+        finish();
         startActivity(intent);
     }
 

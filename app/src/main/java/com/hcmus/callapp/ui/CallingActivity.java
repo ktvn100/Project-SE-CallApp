@@ -194,7 +194,7 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.child(callerId).child(CALL_REQUEST_KEY).getValue().equals("true")) {
-                    //mDBRef.child("users").child(callerId).child(CALL_REQUEST_KEY).setValue("false");
+                    mDBRef.child("users").child(callerId).child(CALL_REQUEST_KEY).setValue("false");
                     if (mServiceConnected) {
                         createCall();
                     }
@@ -270,10 +270,6 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
                 return;
             }
 
-            mTimer = new Timer();
-            mDurationTask = new UpdateCallDurationTask();
-            mTimer.schedule(mDurationTask, 0, 500);
-
             mCallId = call.getCallId();
             call.addCallListener(new SinchCallListener());
             if (call.getState().toString().equals("INITIATING")) {
@@ -325,9 +321,7 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
             mSensorManager.registerListener(this, mProximity, SensorManager.SENSOR_DELAY_NORMAL);
         }
         else {
-            mTimer = new Timer();
-            mDurationTask = new UpdateCallDurationTask();
-            mTimer.schedule(mDurationTask, 0, 500);
+
         }
     }
 
@@ -380,13 +374,13 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
         @Override
         public void onCallEnded(Call call) {
             call = null;
-            setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
             endCall();
         }
 
         @Override
         public void onCallEstablished(Call call) {
-            setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+            //setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+            mDBRef.child("users").child(mSinchId).child(CALL_REQUEST_KEY).setValue("false");
             startClock();
         }
 
