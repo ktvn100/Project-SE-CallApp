@@ -4,11 +4,14 @@ import java.io.Serializable;
 
 public class User implements Serializable {
     public String status, androidID, username;
+    public String call_request;
 
-    public User(String status,String androidID, String username) {
+
+    public User(String status,String androidID, String username, String call_request) {
         this.status = status;
         this.androidID = androidID;
         this.username = username;
+        this.call_request = call_request;
     }
 
     public User(User user) {

@@ -28,13 +28,13 @@ public class SinchService extends Service {
     public static final String CALL_ID = "call_id";
     static final String TAG = SinchService.class.getSimpleName();
 
-    private SinchServiceInterface _SinchServiceInterface = new SinchServiceInterface();
-    private SinchClient _SinchClient = null;
-    private String _UserID = "anonymous";
+    private final IBinder mSinchServiceInterface = new SinchServiceInterface();
+    private SinchClient mSinchClient;
+    private String mUserID;
 
     private String CALLER_SCREEN_KEY = "caller_screen";
 
-    private StartFailedListened _Listener;
+    private StartFailedListened mListener;
 
 
     @Override
@@ -44,18 +44,18 @@ public class SinchService extends Service {
 
     @Override
     public void onDestroy() {
-        if (_SinchClient != null && _SinchClient.isStarted()){
-            _SinchClient.terminate();
+        if (mSinchClient != null && mSinchClient.isStarted()){
+            mSinchClient.terminate();
         }
         super.onDestroy();
     }
 
     private void start(String userName){
-        if(_SinchClient == null){
+        if(mSinchClient == null){
             // create new client
-            _UserID = userName;
+            mUserID = userName;
 
-            _SinchClient = Sinch.getSinchClientBuilder()
+            mSinchClient = Sinch.getSinchClientBuilder()
                     .context(getApplicationContext())
                     .userId(userName)
                     .applicationKey(APP_KEY)
@@ -63,43 +63,43 @@ public class SinchService extends Service {
                     .environmentHost(ENVIRONMENT)
                     .build();
 
-            _SinchClient.setSupportCalling(true);
-            _SinchClient.startListeningOnActiveConnection();
-            _SinchClient.addSinchClientListener(new MySinchClientListener());
+            mSinchClient.setSupportCalling(true);
+            mSinchClient.startListeningOnActiveConnection();
+            mSinchClient.addSinchClientListener(new MySinchClientListener());
 
-            _SinchClient.getCallClient().setRespectNativeCalls(false);
-            _SinchClient.getCallClient().addCallClientListener(new SinchCallClientList());
-            _SinchClient.start();
+            mSinchClient.getCallClient().setRespectNativeCalls(false);
+            mSinchClient.getCallClient().addCallClientListener(new SinchCallClientList());
+            mSinchClient.start();
         }
     }
 
     private void stop(){
-        if (_SinchClient != null){
-            _SinchClient.terminate();
-            _SinchClient = null;
+        if (mSinchClient != null){
+            mSinchClient.terminate();
+            mSinchClient = null;
         }
     }
 
     private boolean isStarted(){
-        return (_SinchClient != null && _SinchClient.isStarted());
+        return (mSinchClient != null && mSinchClient.isStarted());
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return _SinchServiceInterface;
+        return mSinchServiceInterface;
     }
 
     public class SinchServiceInterface extends Binder {
         public Call callUser(String userID){
-            if (_SinchClient == null){
+            if (mSinchClient == null){
                 return null;
             }
-            return _SinchClient.getCallClient().callUser(userID);
+            return mSinchClient.getCallClient().callUser(userID);
         }
 
         public String getUsername(){
-            return _UserID;
+            return mUserID;
         }
 
         public boolean isStarted(){
@@ -114,12 +114,12 @@ public class SinchService extends Service {
             SinchService.this.stop();
         }
 
-        public void setStartListened(StartFailedListened listened){
-            _Listener = listened;
+        public void setStartListener(StartFailedListened listened){
+            mListener = listened;
         }
 
         public Call getCall(String callID){
-            return _SinchClient.getCallClient().getCall(callID);
+            return mSinchClient.getCallClient().getCall(callID);
         }
     }
 
@@ -134,8 +134,8 @@ public class SinchService extends Service {
         @Override
         public void onClientStarted(SinchClient sinchClient) {
             Log.d(TAG,"SinchClient is started!");
-            if (_Listener != null){
-                _Listener.onStarted();
+            if (mListener != null){
+                mListener.onStarted();
             }
         }
 
@@ -146,11 +146,11 @@ public class SinchService extends Service {
 
         @Override
         public void onClientFailed(SinchClient sinchClient, SinchError sinchError) {
-            if (_Listener != null){
-                _Listener.onStartFailed(sinchError);
+            if (mListener != null){
+                mListener.onStartFailed(sinchError);
             }
-            _SinchClient.terminate();
-            _SinchClient = null;
+            mSinchClient.terminate();
+            mSinchClient = null;
         }
 
         @Override

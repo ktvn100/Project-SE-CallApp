@@ -31,11 +31,12 @@ public class CallAction {
     static int WAITING = 0;
     static int FREE = 1;
     private int state = FREE;
+    private static final String CALLERID_DATA_KEY = "callerId";
     public CallAction(Activity activity)
     {
         Log.d(TAG, "CallAction: activity");
         this.activity = activity;
-        Log.d(TAG, "CallAction: assign butotn");
+        Log.d(TAG, "CallAction: assign button");
         button = (Button) this.activity.findViewById(R.id.findButton);
         Log.d(TAG, "CallAction: assign progressbar");
         progressBar = (ProgressBar)this.activity.findViewById(R.id.progress_circular);
@@ -75,8 +76,8 @@ public class CallAction {
         chronometer.start();
         state = WAITING;
         // Bat dau tim kiem
-        makeCall();
         //findingMate();
+        makeCall();
     }
 
     private void findingMate() {
@@ -115,11 +116,11 @@ public class CallAction {
 
 
                     if (androidID.equals(ID)){
-                        curUser = new User(status,androidID,username);
+                        //curUser = new User(status,androidID,username);
                         Log.d("ID: ", androidID);
                     } else {
                         if (status.equals("0")){
-                            user = new User(status,androidID,username);
+                            //user = new User(status,androidID,username);
                             Log.d("ID: ", androidID);
                         }
                     }
@@ -129,7 +130,7 @@ public class CallAction {
                 } else {
                     callUser(user,curUser);
                 }*/
-                callUser(user,curUser);
+                //callUser(user,curUser);
             }
 
             @Override
@@ -142,7 +143,8 @@ public class CallAction {
         Intent intent = new Intent(activity, CallingActivity.class);
         intent.putExtra("User",user);
         intent.putExtra("CurUser",curUser);
-        activity.finish();
+        intent.putExtra(CALLERID_DATA_KEY, "a");
+        //activity.finish();
         activity.startActivity(intent);
     }
 }

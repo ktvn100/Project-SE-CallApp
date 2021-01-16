@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,6 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.hcmus.callapp.R;
 import com.hcmus.callapp.model.User;
+import com.hcmus.callapp.utils.AESUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,17 +30,20 @@ import android.provider.Settings.System;
 public class LoginActivity extends AppCompatActivity {
 
     @BindView(R.id.login)
-    Button _btnLogin;
+    Button btnLogin;
 
     @BindView(R.id.username)
-    EditText _edUsername;
+    EditText edtUsername;
 
-    private FirebaseDatabase _UserDB;
-    private DatabaseReference _DBRef;
-    private FirebaseAuth _Auth;
+    private FirebaseDatabase mUserDB;
+    private DatabaseReference mDBRef;
+    private FirebaseAuth mAuth;
 
     public int state = 1;
     public SettingButton settingButton;
+
+    private static final String SHARED_PREFS_KEY = "shared_prefs";
+    private static final String SINCH_ID_KEY = "sinch_id";
 
 
     @Override
@@ -55,9 +60,9 @@ public class LoginActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        _UserDB = FirebaseDatabase.getInstance();
-        _DBRef = _UserDB.getReference("Users");
-        _Auth = FirebaseAuth.getInstance();
+        mUserDB = FirebaseDatabase.getInstance();
+        mDBRef = mUserDB.getReference("users");
+        mAuth = FirebaseAuth.getInstance();
 
         Button button = (Button) findViewById(R.id.login);
         button.setOnClickListener(new View.OnClickListener() {
@@ -72,10 +77,23 @@ public class LoginActivity extends AppCompatActivity {
 
     private void registerUser() {
         String androidID = System.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-        final String _Username = _edUsername.getText().toString();
-        User user = new User("1",androidID, _Username);
+        String encrypted = "";
+        try {
+            encrypted = AESUtils.encrypt(androidID);
+            Log.d("TEST", "encrypted:" + encrypted);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        _DBRef.child(androidID).setValue(user);
+        final String _Username = edtUsername.getText().toString();
+        //encrypted = "ABC";
+
+        User user = new User("0",encrypted, _Username,"false");
+
+        mDBRef.child(encrypted).setValue(user);
+
+        SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
+        prefs.edit().putString(SINCH_ID_KEY, encrypted).apply();
     }
 
     private void openMainActivity() {
