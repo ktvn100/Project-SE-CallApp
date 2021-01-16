@@ -50,6 +50,8 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
     private String mSinchId;
     private String mOriginalCaller;
 
+    private DatabaseReference _DBRef;
+
     private NetworkChangeReceiver networkChangeReceiver;
     private BroadcastReceiver mDialogReceiver;
     private AlertDialog mInternetDialog;
@@ -88,6 +90,9 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
 
         SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
         mSinchId = prefs.getString(SINCH_ID_KEY, null);
+
+        _DBRef = FirebaseDatabase.getInstance().getReference("users");
+        _DBRef.child(mSinchId).child("status").setValue("1");
 
         networkChangeReceiver = new NetworkChangeReceiver();
         registerReceiver(networkChangeReceiver, filter);
@@ -187,8 +192,6 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
         String ID = mSinchId;
         Log.d("ID: ", ID);
 
-        DatabaseReference _DBRef = FirebaseDatabase.getInstance().getReference("users");
-        _DBRef.child(ID).child("status").setValue("1");
         _DBRef.child(ID).child("call_request").setValue("true");
 
         _DBRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -377,4 +380,12 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
         Intent intent = new Intent(this, CallingActivity.class);
         startActivity(intent);
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        _DBRef.child(mSinchId).child("status").setValue("0");
+        finish();
+    }
+
 }
