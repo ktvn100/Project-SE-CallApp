@@ -40,7 +40,7 @@ public class AudioPlayer {
 
                 try {
                     mPlayer.setDataSource(mContext,
-                            Uri.parse("android.resource://" + mContext.getPackageName() + "/" + R.raw.phone_loud1));
+                            Uri.parse("android.resource://" + mContext.getPackageName() + "/" + R.raw.phone_loud3));
                     mPlayer.prepare();
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Could not setup media player for ringtone");
