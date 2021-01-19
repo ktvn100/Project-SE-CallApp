@@ -36,6 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.hcmus.callapp.R;
 import com.hcmus.callapp.model.User;
 import com.hcmus.callapp.services.SinchService;
+import com.hcmus.callapp.utils.AudioPlayer;
 import com.hcmus.callapp.utils.NoResponseHandler;
 import com.sinch.android.rtc.ClientRegistration;
 import com.sinch.android.rtc.MissingPermissionException;
@@ -55,9 +56,10 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.github.inflationx.viewpump.ViewPumpContextWrapper;
 import timber.log.Timber;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class CallingActivity extends BaseActivity implements SensorEventListener {
 
@@ -103,6 +105,8 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
     private PowerManager.WakeLock mWakeLock;
     private boolean mIsSpeakerPhone = false;
     private boolean mIsMicMuted = false;
+    private AudioManager mAudioManager;
+    private AudioPlayer mAudioPlayer;
 
     private class UpdateCallDurationTask extends TimerTask {
 
@@ -134,6 +138,10 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         chronometer.setText("Waiting...");
 
+        mAudioPlayer = new AudioPlayer(this);
+
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
         SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
         mSinchId = prefs.getString(SINCH_ID_KEY, null);
 
@@ -148,6 +156,42 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
             @Override
             public void onClick(View view) {
                 endCall();
+            }
+        });
+
+        Button mSpeakerPhoneButton = (Button) findViewById(R.id.btn_speakerphone);
+        mSpeakerPhoneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAudioManager.setSpeakerphoneOn(!mIsSpeakerPhone);
+                mIsSpeakerPhone = !mIsSpeakerPhone;
+                String toastMessage;
+                if (mIsSpeakerPhone) {
+                    toastMessage = getString(R.string.speakerphone_on);
+                    mSpeakerPhoneButton.setBackgroundResource(R.drawable.speakerphone_selected);
+                } else {
+                    toastMessage = getString(R.string.speakerphone_off);
+                    mSpeakerPhoneButton.setBackgroundResource(R.drawable.ic_speakerphone);
+                }
+                Toast.makeText(CallingActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
+
+            }
+        });
+        Button mMicrophoneButton = (Button) findViewById(R.id.btn_microphone);
+        mMicrophoneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAudioManager.setMicrophoneMute(!mIsMicMuted);
+                mIsMicMuted = !mIsMicMuted;
+                String toastMessage;
+                if (mIsMicMuted) {
+                    toastMessage = getString(R.string.mic_is_muted);
+                    mMicrophoneButton.setBackgroundResource(R.drawable.microphone_selected);
+                } else {
+                    toastMessage = getString(R.string.mic_is_unmuted);
+                    mMicrophoneButton.setBackgroundResource(R.drawable.ic_mic_off);
+                }
+                Toast.makeText(CallingActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -241,6 +285,8 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
     }
 
     private void endCall() {
+        mAudioPlayer.stopProgressTone();
+
         Call call = getSinchServiceInterface().getCall(mCallId);
         if (call != null){
             call.hangup();
@@ -251,6 +297,9 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
         chronometer.stop();
         //sinchClient.stopListeningOnActiveConnection();
         //sinchClient.terminate();
+        if (mProximity != null) {
+            mSensorManager.unregisterListener(this);
+        }
         openMainActivity();
     }
 
@@ -285,8 +334,7 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-
+        super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase));
     }
 
     @Override
@@ -369,10 +417,33 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
         }).start();
     }
 
+    AudioManager.OnAudioFocusChangeListener mFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+        @Override
+        public void onAudioFocusChange(int focusChange) {
+            if (focusChange == AudioManager.AUDIOFOCUS_LOSS
+                    || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+                setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+            }
+        }
+    };
 
     private class SinchCallListener implements CallListener {
         @Override
         public void onCallEnded(Call call) {
+            CallEndCause cause = call.getDetails().getEndCause();
+            Timber.d("Call ended. Reason: " + cause.toString());
+            mAudioPlayer.stopProgressTone();
+
+            // Abandons audio focus so that any interrupted app can gain audio focus
+            mAudioManager.abandonAudioFocus(mFocusChangeListener);
+
+            String endMsg = "Call ended";
+            Toast.makeText(CallingActivity.this, endMsg, Toast.LENGTH_LONG).show();
+
+            if (mProximity != null) {
+                mSensorManager.unregisterListener(CallingActivity.this);
+            }
+
             call = null;
             endCall();
         }
@@ -380,6 +451,18 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
         @Override
         public void onCallEstablished(Call call) {
             //setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+
+            Timber.d("Call established");
+            Toast.makeText(CallingActivity.this, "Call Connected", Toast.LENGTH_SHORT).show();
+            mAudioManager.requestAudioFocus(mFocusChangeListener,
+                    AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+            mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+            mIsSpeakerPhone = false;
+            mIsMicMuted = false;
+            mAudioManager.setSpeakerphoneOn(mIsSpeakerPhone);
+            mAudioManager.setMicrophoneMute(mIsMicMuted);
+            mAudioPlayer.stopProgressTone();
+
             mDBRef.child("users").child(mSinchId).child(CALL_REQUEST_KEY).setValue("false");
             startClock();
         }
@@ -387,6 +470,7 @@ public class CallingActivity extends BaseActivity implements SensorEventListener
         @Override
         public void onCallProgressing(Call call) {
             Timber.d("Call progressing");
+            mAudioPlayer.playProgressTone();
         }
 
         @Override

@@ -22,14 +22,37 @@
         android:id="@+id/chronometer"/>
 
     <Button
+        android:id="@+id/btn_hangup"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
         android:layout_gravity="bottom|right"
-        android:layout_marginBottom="50dp"
-        android:layout_marginRight="30dp"
-        android:background="@drawable/endcall01"
-        android:id="@+id/btn_hangup"/>
+        android:layout_marginRight="0dp"
+        android:layout_marginBottom="55dp"
+        android:background="@drawable/endcall01" />
+
+    <Button
+        android:id="@+id/btn_speakerphone"
+        android:layout_width="113dp"
+        android:layout_height="115dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="150dp"
+        android:layout_marginBottom="70dp"
+        android:background="@drawable/ic_speakerphone"
+        />
+
+    <Button
+        android:id="@+id/btn_microphone"
+        android:layout_width="113dp"
+        android:layout_height="115dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="273dp"
+        android:layout_marginBottom="70dp"
+        android:background="@drawable/ic_mic_off" />
 
 </RelativeLayout>

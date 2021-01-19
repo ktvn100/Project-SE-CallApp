@@ -27,8 +27,8 @@ import com.hcmus.callapp.utils.NoResponseHandler;
 import com.sinch.android.rtc.SinchError;
 
 import butterknife.BindView;
+import io.github.inflationx.viewpump.ViewPumpContextWrapper;
 import timber.log.Timber;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class WaitingActivity extends AppCompatActivity {
 
@@ -130,7 +130,7 @@ public class WaitingActivity extends AppCompatActivity {
     }
     @Override
     protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+        super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase));
 
     }
 
