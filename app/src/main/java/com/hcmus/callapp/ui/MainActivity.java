@@ -40,8 +40,8 @@ import com.hcmus.callapp.services.SinchService;
 import com.sinch.android.rtc.SinchError;
 
 import butterknife.BindView;
+import io.github.inflationx.viewpump.ViewPumpContextWrapper;
 import timber.log.Timber;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static android.content.ContentValues.TAG;
 
@@ -361,7 +361,7 @@ public class MainActivity extends BaseActivity implements SinchService.StartFail
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+        super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase));
 
     }
 

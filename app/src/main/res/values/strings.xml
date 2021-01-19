@@ -30,4 +30,9 @@
     <string name="cancel_call">Cancel call?</string>
     <string name="connecting">Connecting...</string>
 
+    <string name="mic_is_muted">Microphone Muted</string>
+    <string name="mic_is_unmuted">Microphone Unmuted</string>
+    <string name="speakerphone_on">Speakerphone On</string>
+    <string name="speakerphone_off">Speakerphone Off</string>
+
 </resources>
