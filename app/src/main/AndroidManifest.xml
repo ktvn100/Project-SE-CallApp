@@ -38,6 +38,8 @@
             </intent-filter>
         </service>
 
+        <service android:name=".services.MusicBackground"/>
+
         <activity
             android:name=".ui.SettingsActivity"
             android:label="@string/title_activity_settings">

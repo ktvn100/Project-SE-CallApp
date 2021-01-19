@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.hcmus.callapp.R;
 import com.hcmus.callapp.model.User;
+import com.hcmus.callapp.services.MusicBackground;
 import com.hcmus.callapp.utils.AESUtils;
 
 import butterknife.BindView;
@@ -73,6 +74,12 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
         settingButton = new SettingButton(this, R.id.settingBtn);
+
+        // Chay nhac trong background
+        startService(new Intent(this, MusicBackground.class));
+
+        // Dung chay nhac
+        //stopService(new Intent(this,MusicBackground.class));
     }
 
     private void registerUser() {
